@@ -1,0 +1,36 @@
+stages:
+  - build
+  - security
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+  - node_modules/
+  - build/
+
+build:
+  image: node:8
+  stage: build
+  script:
+    - apt-get update && apt-get install -y gawk
+    - npm install
+    - npm install -g truffle
+    - npm install -g ganache-cli
+    - chmod +x coverage-verify.sh
+    - ./coverage-verify.sh 100
+  coverage: '/coverage: \d+.\d+\%/'
+
+
+mythril:
+  image: sharathkumaranbu/mythril-ci
+  stage: security
+  script:
+    #- python /scripts/processor.py
+    - myth --truffle
+
+solium:
+  image: node:8
+  stage: security
+  script:
+    - npm install -g solium
+    - solium -d contracts/
+  
